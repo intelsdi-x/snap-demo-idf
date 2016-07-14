@@ -4,10 +4,26 @@ Kubernetes is available on Google Cloud Platform Container Engine, and can be in
 
 ### Command Line Tools
 
+Install kubectl command line tool:
 ```
+mkdir "${HOME}/bin"
 export KUBERNETES_VERSION=1.3.0
-curl https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/darwin/amd64/kubectl -o /usr/local/bin/kubectl
-chmod 755 /usr/local/bin/kubectl
+
+if [[ $(uname) == "Darwin" ]]
+then export OS="darwin"
+else export OS="linux"
+fi
+
+curl "https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/${OS}/amd64/kubectl" -o "${HOME}/bin/kubectl"
+
+chmod 755 "${HOME}/bin/kubectl"
+```
+
+Install kubectl autocompletion:
+```
+kubectl completion zsh > "${HOME}/.kubectl.zsh"
+echo "source ${HOME}/.kubectl.zsh" >> "${HOME}/.zshrc"
+source ${HOME}/.zshrc
 ```
 
 ### Vagrant
