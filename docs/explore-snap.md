@@ -27,7 +27,9 @@ $ sudo snapd -t 0 -l 1
 * init.d (RedHat 6/Ubuntu 14.04)
 ```
 $ sudo service snapd start
+Starting snap daemon:                                      [  OK  ]
 $ sudo service snapd status
+snapd (pid  3362) is running...
 ```
 
 * systemd (RedHat 7/Ubuntu 16.04)
@@ -46,7 +48,7 @@ $ sudo systemctl status snapd
            `-3149 /usr/bin/snapd
 ```
 
-snapd config:
+snapd configuration files:
 ```
 $ tree /etc/snap
 /etc/snap/
@@ -54,7 +56,7 @@ $ tree /etc/snap
 `-- snapd.conf
 ```
 
-snapd logs:
+examine snapd logs:
 ```
 $ tail -f /var/log/snap/snapd.log
 ...
@@ -62,6 +64,14 @@ time="2016-06-07T16:19:44-07:00" level=info msg="plugin load called" _block=load
 time="2016-06-07T16:19:44-07:00" level=info msg="plugin load called" _block=load-plugin _module=control-plugin-mgr path=snap-plugin-collector-cpu
 time="2016-06-07T16:19:44-07:00" level=debug msg="timeout chan start" _block=waitHandling _module=control-plugin-execution
 ```
+
+### Exercise
+
+Update snapd.conf:
+* set log_level=debug
+* set max-running-plugins
+* start snapd on a different port to verify changes.
+* restart snapd service
 
 ## snapd REST API
 
@@ -129,13 +139,13 @@ $ curl -L localhost:8181/v1/tasks
 
 ## Load Plugin
 
-Download plugins (IDF skip):
+Download plugins (IDF students skip):
 ```
 $ curl -fL linux.plugin.dl.snap-telemetry.io -o plugin.tar.gz
 $ tar xvf plugin.tar.gz
 ```
 
-Available plugins:
+currently available plugins:
 ```
 $ ls /vagrant/plugins
 snap-collector-mock1                 snap-plugin-collector-nova
@@ -167,16 +177,18 @@ NAMESPACE                  VERSIONS
 /intel/psutil/cpu0/nice           6
 ```
 
-publishers:
-```
-$ snapctl plugin load snap-plugin-publisher-file
-Plugin loaded
-Name: file
-Version: 1
-Type: publisher
-Signed: false
-Loaded Time: Thu, 21 Jul 2016 11:31:52 PDT
-```
+### Excercise
+
+Use snapctl command to:
+* load snap-plugin-collector-meminfo
+* list meminfo metrics
+* unload snap-plugin-collector-meminfo
+* load snap-plugin-collector-smart
+
+Use curl and REST API to (hint: curl ... | jq):
+* list available metrics in REST
+* list single metric in REST
+* what does /intel/psutil/vm/inactive metrics collect? (see [metrics 2.0](http://metrics20.org/) goals)
 
 ## Writing task
 
@@ -210,10 +222,20 @@ $ cat /opt/snap/examples/tasks/psutil-file_no-processor.yaml
         /intel/psutil/load/load15: {}
         /intel/psutil/load/load5: {}
       publish:
-        -
-          plugin_name: "file"
+        - plugin_name: "file"
           config:
             file: "/tmp/snap_published_demo_file.log"
+```
+
+load required file publisher plugin:
+```
+$ snapctl plugin load snap-plugin-publisher-file
+Plugin loaded
+Name: file
+Version: 1
+Type: publisher
+Signed: false
+Loaded Time: Thu, 21 Jul 2016 11:31:52 PDT
 ```
 
 create tasks
@@ -247,13 +269,27 @@ $ tail -f /tmp/snap_published_demo_file.log
 $ tail -1 /tmp/snap_published_demo_file.log | jq
 ```
 
-NOTE: see task lifecycle.
+### Exercise
+
+Write a new task:
+* gather all smart disk statistics. (hint use: '*' )
+* write metrics to /var/log/disk_statistics.yaml
+* run nightly at 3:00 AM.
+* run it once to verify it works.
+
+## Task Lifecycle
+
+NOTE: see task lifecycle slides.
+
+### Exercise
+
+* delete psutil task
+* disable smart task
 
 ## Grafana
 
-## Excercise
+### Excercise
 
-* load/unload <new> plugin
-* create tasks to gather <list> of metrics.
-* stop/start tasks
-* delete tasks
+* load snap-plugihn-publisher-influxdb
+* change task to publish to influxdb
+* observe telemetry data in Grafana
