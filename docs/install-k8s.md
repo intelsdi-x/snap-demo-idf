@@ -1,6 +1,12 @@
 ## Install Kubernetes
 
-Kubernetes is available on Google Cloud Platform Container Engine, and can be installed on multiple other platforms via kargo.
+In this section we will:
+
+* install kubectl tools locally
+* start kuberenets VMs
+* verify kubernetes services are running.
+
+NOTE: commands executed in the vagrant VMs are prefaced with `k8s-01 $` instead of just `$`
 
 ### Command Line Tools
 
@@ -40,18 +46,18 @@ Bringing machine 'k8s-03' up with 'virtualbox' provider...
 ...
 ```
 
-NOTE: during initial provisioning, some tasks such as etcd may error, but will startup correctly. Run vagrant provision again if cluster-info does not show kubedns running.
+NOTE: during initial provisioning, some tasks such as etcd may error, but should  startup correctly unless the verification steps fail. 
 
 Verify Kubernetes is running:
 ```
 $ vagrant ssh k8s-01 -- -L 8080:localhost:8080
 
-$ kubectl cluster-info
+k8s-01 $ kubectl cluster-info
 Kubernetes master is running at http://localhost:8080
 dnsmasq is running at http://localhost:8080/api/v1/proxy/namespaces/kube-system/services/dnsmasq
 kubedns is running at http://localhost:8080/api/v1/proxy/namespaces/kube-system/services/kubedns
 
-$ kubectl get pods --namespace=kube-system -o wide
+k8s-01 $ kubectl get pods --namespace=kube-system -o wide
 
 NAME                             READY     STATUS    RESTARTS   AGE       NODE
 dnsmasq-k1qkq                    1/1       Running   0          1h        k8s-02
@@ -70,14 +76,30 @@ kube-scheduler-k8s-02            1/1       Running   0          1h        k8s-02
 kubedns-cvsbm                    4/4       Running   0          1h        k8s-03
 ```
 
+Verify etcd is running and flannel network available (one per VM):
+```
+k8s-01 $ etcdctl ls /cluster.local/network/subnets
+/cluster.local/network/subnets/10.233.71.0-24
+/cluster.local/network/subnets/10.233.109.0-24
+/cluster.local/network/subnets/10.233.85.0-24
+```
+
+Run vagrant provision again if cluster-info does not show kubedns running or no flannel network is listed:
+```
+$ vagrant provision
+```
+
 The ssh port forwarding will allow kubectl command to work directly the local system without the need to ssh into k8s-01.
 
-### Google Cloud Platform
+```
+$ kubectl cluster-info
+Kubernetes master is running at http://localhost:8080
+dnsmasq is running at http://localhost:8080/api/v1/proxy/namespaces/kube-system/services/dnsmasq
+kubedns is running at http://localhost:8080/api/v1/proxy/namespaces/kube-system/services/kubedns
+```
 
-Please follow the kubesnap repo for instructions on GCE:
-https://github.com/intelsdi-x/kubesnap/
+## Reference
 
-### Other
+Kubernetes is available on Google Cloud Platform Container Engine, and can be installed on multiple other platforms via kargo:
 
-See Kargo project for other ways to bootstrap kubernetes:
 https://docs.kubespray.io/
