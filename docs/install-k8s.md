@@ -40,9 +40,17 @@ Bringing machine 'k8s-03' up with 'virtualbox' provider...
 ...
 ```
 
+NOTE: during initial provisioning, some tasks such as etcd may error, but will startup correctly. Run vagrant provision again if cluster-info does not show kubedns running.
+
 Verify Kubernetes is running:
 ```
 $ vagrant ssh k8s-01 -- -L 8080:localhost:8080
+
+$ kubectl cluster-info
+Kubernetes master is running at http://localhost:8080
+dnsmasq is running at http://localhost:8080/api/v1/proxy/namespaces/kube-system/services/dnsmasq
+kubedns is running at http://localhost:8080/api/v1/proxy/namespaces/kube-system/services/kubedns
+
 $ kubectl get pods --namespace=kube-system -o wide
 
 NAME                             READY     STATUS    RESTARTS   AGE       NODE
@@ -61,6 +69,8 @@ kube-scheduler-k8s-01            1/1       Running   0          1h        k8s-01
 kube-scheduler-k8s-02            1/1       Running   0          1h        k8s-02
 kubedns-cvsbm                    4/4       Running   0          1h        k8s-03
 ```
+
+The ssh port forwarding will allow kubectl command to work directly the local system without the need to ssh into k8s-01.
 
 ### Google Cloud Platform
 
