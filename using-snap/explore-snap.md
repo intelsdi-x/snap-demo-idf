@@ -19,20 +19,12 @@ snap plugins
 
 ## snapd Service
 
-* development/debug mode (Mac)
+* development/debug mode
 ```
 $ sudo snapd -t 0 -l 1
 ```
 
-* init.d (RedHat 6/Ubuntu 14.04)
-```
-$ sudo service snapd start
-Starting snap daemon:                                      [  OK  ]
-$ sudo service snapd status
-snapd (pid  3362) is running...
-```
-
-* systemd (RedHat 7/Ubuntu 16.04)
+* systemd service
 ```
 $ sudo systemctl start snapd
 $ sudo systemctl status snapd

@@ -1,26 +1,29 @@
 ## Install Snap
 
-* MacOS
-* RedHat/Centos
-* Ubuntu
+list package content:
+```
+$ dpkg-deb -c ${home}/idflab/snap-telemetry_0.15.0-1xenial_amd64.deb
+drwxr-xr-x 0/0               0 2016-07-15 16:21 ./
+drwxr-xr-x 0/0               0 2016-07-15 16:21 ./opt/
+drwxr-xr-x 0/0               0 2016-07-15 16:21 ./opt/snap/
+drwxr-xr-x 0/0               0 2016-07-15 16:21 ./opt/snap/bin/
+-rwxr-xr-x 0/0        16977919 2016-07-15 16:21 ./opt/snap/bin/snapd
+-rwxr-xr-x 0/0         9554554 2016-07-15 16:21 ./opt/snap/bin/snapctl
+...
 
-## MacOS
+install snap:
 
 ```
-curl -O https://github.com/intelsdi-x/snap/releases/download/v0.15.0-beta/snap-telemetry-0.15.0.pkg
-sudo installer -allowUntrusted -verboseR -pkg ./snap-telemetry-0.15.0.pkg -target /
+$ sudo dpkg -i ${home}/idflab/snap-telemetry_0.15.0-1xenial_amd64.deb
+(Reading database ... 59710 files and directories currently installed.)
+Preparing to unpack snap-telemetry_0.15.0-1xenial_amd64.deb ...
+Unpacking snap-telemetry (0.15.0-1xenial) over (0.15.0-1xenial) ...
+Setting up snap-telemetry (0.15.0-1xenial) ...
+Processing triggers for man-db (2.7.5-1) ...
 ```
 
-## Redhat
-
+snap man pages:
 ```
-curl -s https://packagecloud.io/install/repositories/intelsdi-x/snap/script.rpm.sh | sudo bash
-sudo yum install -y snap-telemetry
-```
-
-## Ubuntu
-
-```
-curl -s https://packagecloud.io/install/repositories/intelsdi-x/snap/script.deb.sh | sudo bash
-sudo apt-get install -y snap-telemetry
+$ man snapd
+$ man snapctl
 ```
