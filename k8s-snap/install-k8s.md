@@ -74,6 +74,14 @@ kube-proxy-k8s-03                1/1       Running   2          1h        k8s-03
 kube-scheduler-k8s-01            1/1       Running   0          1h        k8s-01
 kube-scheduler-k8s-02            1/1       Running   0          1h        k8s-02
 kubedns-cvsbm                    4/4       Running   0          1h        k8s-03
+
+k8s-01 $ kubectl get componentstatuses
+NAME                 STATUS    MESSAGE              ERROR
+controller-manager   Healthy   ok
+scheduler            Healthy   ok
+etcd-0               Healthy   {"health": "true"}
+etcd-2               Healthy   {"health": "true"}
+etcd-1               Healthy   {"health": "true"}
 ```
 
 Verify etcd is running and flannel network available (one per VM):
