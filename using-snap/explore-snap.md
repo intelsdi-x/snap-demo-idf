@@ -19,13 +19,14 @@ snap plugins
 
 ## snapd Service
 
-* development/debug mode
+* development/debug mode (ctrl+c to exit):
 ```
 $ sudo snapd -t 0 -l 1
 ```
 
 * systemd service
 ```
+$ sudo systemctl daemon-reload
 $ sudo systemctl start snapd
 $ sudo systemctl status snapd
 * snapd.service - Snap daemon
@@ -60,10 +61,10 @@ time="2016-06-07T16:19:44-07:00" level=debug msg="timeout chan start" _block=wai
 ### Exercise
 
 Update snapd.conf:
-* set log_level=debug
-* set max-running-plugins
-* start snapd on a different port to verify changes.
-* restart snapd service
+* set `log_level: 1` (debug mode)
+* set `max-running-plugins: 5`
+* open a new terminal `tail -f /var/log/snap/snapd.log`
+* restart snapd service and verify changes in log file
 
 ## snapd REST API
 
@@ -133,16 +134,17 @@ $ curl -L localhost:8181/v1/tasks
 
 Extract plugins:
 ```
-$ cd ${home}/idflab/
+$ cd ${HOME}/idflab/
 $ tar xvf snap-plugin.tar.gz
 ```
 
 currently available plugins:
 ```
-$ ls snap-v0.15.0-beta/plugin/
-snap-plugin-collector-mock1          snap-plugin-collector-nova
-snap-plugin-collector-mock2          snap-plugin-collector-openfoam
-snap-plugin-collector-apache         snap-plugin-collector-osv
+$ cd snap-v0.15.0-beta/plugin/
+$ ls
+snap-plugin-collector-apache         snap-plugin-collector-nova
+snap-plugin-collector-ceph           snap-plugin-collector-openfoam
+snap-plugin-collector-cinder         snap-plugin-collector-osv 
 ...
 ```
 
@@ -159,7 +161,7 @@ Loaded Time: Thu, 21 Jul 2016 11:29:21 PDT
 
 plugins expose metrics:
 ```
-$ snapctl metric list
+$ snapctl metric list | less
 NAMESPACE                  VERSIONS
 /intel/psutil/cpu0/guest          6
 /intel/psutil/cpu0/guest_nice     6
@@ -173,14 +175,14 @@ NAMESPACE                  VERSIONS
 
 Use snapctl command to:
 * load snap-plugin-collector-meminfo
-* list meminfo metrics
+* list meminfo metrics (hint: `... | grep meminfo`)
 * unload snap-plugin-collector-meminfo
 * load snap-plugin-collector-smart
 
-Use curl and REST API to (hint: curl ... | jq):
-* list available metrics in REST
+Use curl and REST API to:
+* list available metrics in REST (hint: `curl ... | jq | less`)
 * list single metric in REST
-* what does /intel/psutil/vm/inactive metrics collect? (see [metrics 2.0](http://metrics20.org/) goals)
+* what does /intel/psutil/vm/inactive metrics collect? (for more info see [metrics 2.0](http://metrics20.org/))
 
 ## Writing task
 
@@ -230,7 +232,7 @@ Signed: false
 Loaded Time: Thu, 21 Jul 2016 11:31:52 PDT
 ```
 
-create tasks
+create tasks from config file:
 ```
 $ snapctl task create -t /opt/snap/examples/tasks/psutil-file_no-processor.yaml
 Using task manifest to create task
@@ -238,13 +240,16 @@ Task created
 ID: 8f3f3994-6341-49e3-bd96-10ec364e3263
 Name: Task-8f3f3994-6341-49e3-bd96-10ec364e3263
 State: Running
+```
 
+list all tasks:
+```
 $ snapctl task list
 ID                      NAME                      STATE          HIT      MISS      FAIL      CREATED          LAST FAILURE
 8f3f3994-6341-49e3-bd96-10ec364e3263      Task-8f3f3994-6341-49e3-bd96-10ec364e3263      Running      16      0      0      11:41AM 7-21-2016
 ```
 
-watch tasks
+watch running tasks:
 ```
 $ snapctl task watch 8f3f3994-6341-49e3-bd96-10ec364e3263
 Watching Task (8f3f3994-6341-49e3-bd96-10ec364e3263):
@@ -259,6 +264,13 @@ $ tail -f /tmp/snap_published_demo_file.log
 [{"namespace":[{"Value":"intel","Description":"","Name":""},{"Value":"psutil","Description":"","Name":""},{"Value":"load","Description":"","Name":""},{"Value":"load1","Description":"","Name":""}],"last_advertised_time":"0001-01-01T00:00:00Z","version":0,"config":null,"data":0,"tags":{"plugin_running_on":"ubuntu1604"},"Unit_":"Load/1M","description":"","timestamp":"2016-07-21T11:49:47.705315535-07:00"},{"namespace":[{"Value":"intel","Description":"","Name":""},{"Value":"psutil","Description":"","Name":""},{"Value":"load","Description":"","Name":""},{"Value":"load15","Description":"","Name":""}],"last_advertised_time":"0001-01-01T00:00:00Z","version":0,"config":null,"data":0.05,"tags":{"plugin_running_on":"ubuntu1604"},"Unit_":"Load/15M","description":"","timestamp":"2016-07-21T11:49:47.705328457-07:00"},{"namespace":[{"Value":"intel","Description":"","Name":""},{"Value":"psutil","Description":"","Name":""},{"Value":"load","Description":"","Name":""},{"Value":"load5","Description":"","Name":""}],"last_advertised_time":"0001-01-01T00:00:00Z","version":0,"config":null,"data":0.01,"tags":{"plugin_running_on":"ubuntu1604"},"Unit_":"Load/5M","description":"","timestamp":"2016-07-21T11:49:47.705337407-07:00"}]
 
 $ tail -1 /tmp/snap_published_demo_file.log | jq
+```
+
+stop task:
+```
+$ snapctl task stop 8f3f3994-6341-49e3-bd96-10ec364e3263
+Task stopped:
+ID: 8f3f3994-6341-49e3-bd96-10ec364e3263
 ```
 
 ### Exercise
