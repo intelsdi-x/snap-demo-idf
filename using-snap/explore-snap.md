@@ -1,4 +1,4 @@
-## Explore Snap
+# Explore Snap
 
 In this section we will:
 
@@ -19,12 +19,12 @@ snap plugins
 
 ## snapd Service
 
-* development/debug mode (ctrl+c to exit):
+development/debug mode (ctrl+c to exit):
 ```
 $ sudo snapd -t 0 -l 1
 ```
 
-* systemd service
+start snapd service:
 ```
 $ sudo systemctl daemon-reload
 $ sudo systemctl start snapd
@@ -132,7 +132,7 @@ $ curl -L localhost:8181/v1/tasks
 
 ## Load Plugin
 
-Extract plugins:
+extract snap plugins:
 ```
 $ cd ${HOME}/idflab/
 $ tar xvf snap-plugin.tar.gz
@@ -148,7 +148,7 @@ snap-plugin-collector-cinder         snap-plugin-collector-osv
 ...
 ```
 
-load plugin:
+load snap psutil plugin:
 ```
 $ snapctl plugin load snap-plugin-collector-psutil
 Plugin loaded
@@ -159,7 +159,7 @@ Signed: false
 Loaded Time: Thu, 21 Jul 2016 11:29:21 PDT
 ```
 
-plugins expose metrics:
+list metrics exposed by plugins:
 ```
 $ snapctl metric list | less
 NAMESPACE                  VERSIONS
@@ -289,6 +289,57 @@ NOTE: see task lifecycle slides.
 
 * delete psutil task
 * disable smart task
+
+## Intel Performance Counter Monitor(PCM)
+
+See example of Intel PCM data:
+```
+$ sudo pcm.x
+ Core (SKT) | EXEC | IPC  | FREQ  | AFREQ | L3MISS | L2MISS | L3HIT | L2HIT | L3MPI | L2MPI | TEMP
+
+   0    0     0.07   1.39   0.05    0.29      63 K    331 K    0.59    0.52    0.00    0.00     55
+   1    0     0.08   1.46   0.05    0.30      71 K    359 K    0.60    0.51    0.00    0.00     55
+   2    0     0.06   1.19   0.05    0.32      51 K    384 K    0.76    0.47    0.00    0.00     57
+   3    0     0.07   1.31   0.05    0.29      56 K    357 K    0.69    0.53    0.00    0.00     57
+   4    0     0.07   1.44   0.05    0.29      46 K    295 K    0.57    0.49    0.00    0.00     55
+   5    0     0.07   1.49   0.04    0.27      46 K    254 K    0.51    0.52    0.00    0.00     55
+   6    0     0.08   1.50   0.05    0.29      53 K    305 K    0.53    0.52    0.00    0.00     57
+   7    0     0.07   1.42   0.05    0.29      51 K    304 K    0.55    0.51    0.00    0.00     57
+---------------------------------------------------------------------------------------------------------------
+ SKT    0     0.07   1.40   0.05    0.29     441 K   2592 K    0.62    0.51    0.00    0.00     53
+---------------------------------------------------------------------------------------------------------------
+ TOTAL  *     0.07   1.40   0.05    0.29     441 K   2592 K    0.62    0.51    0.00    0.00     N/A
+
+ Instructions retired: 2320 M ; Active cycles: 1660 M ; Time (TSC): 4013 Mticks ; C0 (active,non-halted) core residency: 17.68 %
+
+ C1 core residency: 8.32 %; C3 core residency: 0.02 %; C6 core residency: 0.15 %; C7 core residency: 73.84 %;
+ C2 package residency: 65.34 %; C3 package residency: 0.00 %; C6 package residency: 0.00 %; C7 package residency: 0.00 %; C8 package residency: 0.00 %; C9 package residency: 0.00 %; C10 package residency: 0.00 %;
+
+ PHYSICAL CORE IPC                 : 2.79 => corresponds to 69.85 % utilization for cores in active state
+ Instructions per nominal CPU cycle: 0.14 => corresponds to 3.61 % core utilization over time interval
+---------------------------------------------------------------------------------------------------------------
+
+          |  READ |  WRITE |    IO  | CPU energy |
+---------------------------------------------------------------------------------------------------------------
+ SKT   0     0.49     0.20     0.00      13.51
+---------------------------------------------------------------------------------------------------------------
+
+ EXEC  : instructions per nominal CPU cycle
+ IPC   : instructions per CPU cycle
+ FREQ  : relation to nominal CPU frequency='unhalted clock ticks'/'invariant timer ticks' (includes Intel Turbo Boost)
+ AFREQ : relation to nominal CPU frequency while in active state (not in power-saving C state)='unhalted clock ticks'/'invariant timer ticks while in C0-state'  (includes Intel Turbo Boost)
+ L3MISS: L3 cache misses
+ L2MISS: L2 cache misses (including other core's L2 cache *hits*)
+ L3HIT : L3 cache hit ratio (0.00-1.00)
+ L2HIT : L2 cache hit ratio (0.00-1.00)
+ L3MPI : number of L3 cache misses per instruction
+ L2MPI : number of L2 cache misses per instruction
+ READ  : bytes read from memory controller (in GBytes)
+ WRITE : bytes written to memory controller (in GBytes)
+ IO    : bytes read/written due to IO requests to memory controller (in GBytes); this may be an over estimate due to same-cache-line partial requests
+ TEMP  : Temperature reading in 1 degree Celsius relative to the TjMax temperature (thermal headroom): 0 corresponds to the max temperature
+ energy: Energy in Joules
+```
 
 ## Grafana
 
