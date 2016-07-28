@@ -9,7 +9,7 @@ drwxr-xr-x 0/0               0 2016-07-15 16:21 ./opt/snap/
 drwxr-xr-x 0/0               0 2016-07-15 16:21 ./opt/snap/bin/
 -rwxr-xr-x 0/0        16977919 2016-07-15 16:21 ./opt/snap/bin/snapd
 -rwxr-xr-x 0/0         9554554 2016-07-15 16:21 ./opt/snap/bin/snapctl
-...
+```
 
 install snap:
 
