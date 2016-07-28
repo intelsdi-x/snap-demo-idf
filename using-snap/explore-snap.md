@@ -131,17 +131,17 @@ $ curl -L localhost:8181/v1/tasks
 
 ## Load Plugin
 
-Download plugins (IDF students skip):
+Extract plugins:
 ```
-$ curl -fL linux.plugin.dl.snap-telemetry.io -o plugin.tar.gz
-$ tar xvf plugin.tar.gz
+$ cd ${home}/idflab/
+$ tar xvf snap-plugin.tar.gz
 ```
 
 currently available plugins:
 ```
-$ ls /vagrant/plugins
-snap-collector-mock1                 snap-plugin-collector-nova
-snap-collector-mock2                 snap-plugin-collector-openfoam
+$ ls snap-v0.15.0-beta/plugin/
+snap-plugin-collector-mock1          snap-plugin-collector-nova
+snap-plugin-collector-mock2          snap-plugin-collector-openfoam
 snap-plugin-collector-apache         snap-plugin-collector-osv
 ...
 ```
@@ -282,6 +282,6 @@ NOTE: see task lifecycle slides.
 
 ### Excercise
 
-* load snap-plugihn-publisher-influxdb
+* load snap-plugin-publisher-influxdb
 * change task to publish to influxdb
 * observe telemetry data in Grafana

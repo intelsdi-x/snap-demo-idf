@@ -37,6 +37,8 @@ spec:
 deploy snap application:
 ```
 $ kubectl create -f snap/
+configmap "snap-config" created
+daemonset "snap" created
 ```
 
 ### Exercise:
@@ -44,7 +46,6 @@ $ kubectl create -f snap/
 * Update ConfigMap tribe.seed value and deploy snap.
 * What snap plugins and tasks are running?
 * Use snap watch to observe a running tassk.
-
 
 ### Snap Tribe
 
