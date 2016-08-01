@@ -19,7 +19,6 @@ Documentation is available under `using-snap`.
 ### Kubernetes and Snap
 
 Documentation is available under `k8s-snap`.
-* [Install Kubernetes](k8s-snap/install-k8s.md)
 * [Kubernetes 101](k8s-snap/k8s-101.md)
 * [Running Snap in Kubernetes](k8s-snap/run-snap-in-k8s.md)
 * [Snap metrics in Grafana](k8s-snap/snap-metrics.md)
