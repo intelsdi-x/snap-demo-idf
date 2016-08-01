@@ -135,7 +135,7 @@ $ curl -L localhost:8181/v1/tasks
 extract snap plugins:
 ```
 $ cd ${HOME}/idflab/
-$ tar xvf snap-plugin.tar.gz
+$ tar xvf snap-plugins.tar.gz
 ```
 
 currently available plugins:
@@ -174,10 +174,10 @@ NAMESPACE                  VERSIONS
 ### Excercise
 
 Use snapctl command to:
-* load snap-plugin-collector-meminfo
-* list meminfo metrics (hint: `... | grep meminfo`)
-* unload snap-plugin-collector-meminfo
-* load snap-plugin-collector-smart
+* load `snap-plugin-collector-meminfo` plugin
+* list meminfo metrics (hint: `... | grep meminfo | less`)
+* unload `snap-plugin-collector-meminfo` (hint: use `snapctl plugin list` to get necessary info)
+* load `snap-plugin-collector-smart` plugin
 
 Use curl and REST API to:
 * list available metrics in REST (hint: `curl ... | jq | less`)
