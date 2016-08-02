@@ -43,7 +43,7 @@ daemonset "snap" created
 
 ### Exercise:
 
-* Update ConfigMap tribe.seed value and deploy snap.
+* Update ConfigMap tribe.seed value if necessary and deploy snap.
 * What snap plugins and tasks are running?
 * Use snap watch to observe a running tassk.
 
