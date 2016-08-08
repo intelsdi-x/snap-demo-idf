@@ -221,6 +221,22 @@ $ cat /opt/snap/examples/tasks/psutil-file_no-processor.yaml
             file: "/tmp/snap_published_demo_file.log"
 ```
 
+### task schedule
+snap schedule supports:
+* simple (run forever on given interval)
+* window (repeat interval between start/stop time)
+* cron (use cron syntax for interval)
+
+cron schedule example:
+```
+---
+  version: 1
+  schedule: {
+      type: cron
+      interval: "0 30 * * * *"
+  },
+```
+
 load required file publisher plugin:
 ```
 $ snapctl plugin load snap-plugin-publisher-file
@@ -232,6 +248,22 @@ Signed: false
 Loaded Time: Thu, 21 Jul 2016 11:31:52 PDT
 ```
 
+### task metrics
+snap collect matrics can be a concrete namspace, a wildcard `*`, or a tuple `(a|b)`.
+
+As an example the mock plugin with the metrics:
+* /intel/mock/foo/ex1
+* /intel/mock/foo/ex2
+* /intel/mock/bar/ex1
+* /intel/mock/bar/ex2
+
+
+| metrics in task manifest | collected metrics |
+| ------------------------ | ----------------- |
+| /intel/mock/\* | /intel/mock/foo/ex1 </br> /intel/mock/foo/ex2 </br> /intel/mock/bar/ex1 </br> /intel/mock/bar/ex2 |
+| /intel/mock/foo/(ex1/ex2) | /intel/mock/foo/ex1 </br> /intel/mock/foo/ex2|
+| /intel/mock/\*/ex1) | /intel/mock/foo/ex1 </br> /intel/mock/bar/ex1 |
+
 create tasks from config file:
 ```
 $ snapctl task create -t /opt/snap/examples/tasks/psutil-file_no-processor.yaml
@@ -241,6 +273,8 @@ ID: 8f3f3994-6341-49e3-bd96-10ec364e3263
 Name: Task-8f3f3994-6341-49e3-bd96-10ec364e3263
 State: Running
 ```
+
+## Task Lifecycle
 
 list all tasks:
 ```
@@ -281,16 +315,30 @@ Write a new task:
 * run nightly at 3:00 AM.
 * run it once to verify it works.
 
-## Task Lifecycle
-
-NOTE: see task lifecycle slides.
-
-### Exercise
-
+Manage tasks:
 * delete psutil task
 * disable smart task
 
 ## Intel Performance Counter Monitor(PCM)
+
+Intel Performance Counter Monitor(PCM) offers a rich set of CPU metrics:
+```
+ EXEC  : instructions per nominal CPU cycle
+ IPC   : instructions per CPU cycle
+ FREQ  : relation to nominal CPU frequency='unhalted clock ticks'/'invariant timer ticks' (includes Intel Turbo Boost)
+ AFREQ : relation to nominal CPU frequency while in active state (not in power-saving C state)='unhalted clock ticks'/'invariant timer ticks while in C0-state'  (includes Intel Turbo Boost)
+ L3MISS: L3 cache misses
+ L2MISS: L2 cache misses (including other core's L2 cache *hits*)
+ L3HIT : L3 cache hit ratio (0.00-1.00)
+ L2HIT : L2 cache hit ratio (0.00-1.00)
+ L3MPI : number of L3 cache misses per instruction
+ L2MPI : number of L2 cache misses per instruction
+ READ  : bytes read from memory controller (in GBytes)
+ WRITE : bytes written to memory controller (in GBytes)
+ IO    : bytes read/written due to IO requests to memory controller (in GBytes); this may be an over estimate due to same-cache-line partial requests
+ TEMP  : Temperature reading in 1 degree Celsius relative to the TjMax temperature (thermal headroom): 0 corresponds to the max temperature
+ energy: Energy in Joules
+```
 
 See example of Intel PCM data:
 ```
@@ -323,28 +371,32 @@ $ sudo pcm.x
 ---------------------------------------------------------------------------------------------------------------
  SKT   0     0.49     0.20     0.00      13.51
 ---------------------------------------------------------------------------------------------------------------
-
- EXEC  : instructions per nominal CPU cycle
- IPC   : instructions per CPU cycle
- FREQ  : relation to nominal CPU frequency='unhalted clock ticks'/'invariant timer ticks' (includes Intel Turbo Boost)
- AFREQ : relation to nominal CPU frequency while in active state (not in power-saving C state)='unhalted clock ticks'/'invariant timer ticks while in C0-state'  (includes Intel Turbo Boost)
- L3MISS: L3 cache misses
- L2MISS: L2 cache misses (including other core's L2 cache *hits*)
- L3HIT : L3 cache hit ratio (0.00-1.00)
- L2HIT : L2 cache hit ratio (0.00-1.00)
- L3MPI : number of L3 cache misses per instruction
- L2MPI : number of L2 cache misses per instruction
- READ  : bytes read from memory controller (in GBytes)
- WRITE : bytes written to memory controller (in GBytes)
- IO    : bytes read/written due to IO requests to memory controller (in GBytes); this may be an over estimate due to same-cache-line partial requests
- TEMP  : Temperature reading in 1 degree Celsius relative to the TjMax temperature (thermal headroom): 0 corresponds to the max temperature
- energy: Energy in Joules
 ```
+
+### Exercise
+
+* load snap plugin collector pcm
+* load snap plugin processor movingaverage
+* write snap task to gather pcm.x TEMP values and 5 sample size moving average.
 
 ## Grafana
 
+Grafana provides real time visualization of telemetry data gathered by snap.
+
+* login to grafana at [http://localhost:3000](http://localhost:3000) (user: admin password: admin)
+* navigate to the [app config page](http://localhost:3000/plugins/raintank-snap-app/edit) and enable snap app:
+* create a new datasouce with the following settings:
+    Name: "Snap"
+    Default: true
+    Type: Snap DS
+    URL: http://localhost:8181
+    Access: proxy
+* create a new dashboard with a graph panel:
+    Task Name: CPU Idle
+    Interval: 200ms
+    Metrics: /intel/linux/iostat/avg-cpu/%idle
+* click on watch and observe the metrics stream in
+
 ### Excercise
 
-* load snap-plugin-publisher-influxdb
-* change task to publish to influxdb
-* observe telemetry data in Grafana
+* observe pcm.x data in Grafana
