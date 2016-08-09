@@ -388,9 +388,9 @@ resume the Grafana docker container:
 $ docker ps -a
 CONTAINER ID        IMAGE                   COMMAND             CREATED             STATUS                  PORTS               NAMES
 b48300f9de2a        grafana/grafana:3.1.0   "/run.sh"           10 days ago         Exited (0) 5 days ago                       grafana-snap
-/o/s/e/tasks ❯❯❯ docker start b48300f9de2a
+$ docker start b48300f9de2a
 b48300f9de2a
-docker ps
+$ docker ps
 CONTAINER ID        IMAGE                   COMMAND             CREATED             STATUS              PORTS                    NAMES
 b48300f9de2a        grafana/grafana:3.1.0   "/run.sh"           10 days ago         Up 3 seconds        0.0.0.0:3000->3000/tcp   grafana-snap
 ```
