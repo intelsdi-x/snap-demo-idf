@@ -64,7 +64,7 @@ $ sudo systemctl status snapd
 
     NOTE: if snapd service fails to start, troubleshoot in development debug mode (ctrl+c to exit):
     ```
-$ sudo snapd -t 0 -l 1
+$ sudo snapd -l 1
     ```
 
 ## `snapctl` command
@@ -269,9 +269,11 @@ ID: 8f3f3994-6341-49e3-bd96-10ec364e3263
 
 ### Exercise
 
-* load snap plugin `snap-plugin-publisher-file`
+* ensure the following plugins are load
+** `snap-plugin-collector-psutil`
+** `snap-plugin-publisher-file`
 * run the example task `/opt/snap/examples/tasks/psutil-file_no-processor.yaml`
-* verify the task is running successfully
+* verify the task is running successfully (`tail -1 ... | jq`)
 * stop the psutil task `snapctl task stop ...`
 
 ## Writing tasks
@@ -298,17 +300,6 @@ cron schedule example:
   },
 ```
 
-load required file publisher plugin:
-```
-$ snapctl plugin load snap-plugin-publisher-file
-Plugin loaded
-Name: file
-Version: 1
-Type: publisher
-Signed: false
-Loaded Time: Thu, 21 Jul 2016 11:31:52 PDT
-```
-
 ### task metrics
 
 snap collect metrics can be a concrete namespace, a wildcard `*`, or a tuple `(a|b)`.
@@ -327,8 +318,9 @@ As an example the mock plugin with the metrics:
 | /intel/mock/\*/ex1) | /intel/mock/foo/ex1 </br> /intel/mock/bar/ex1 |
 
 ### Exercise
-* gather all smart disk statistics. (hint use: '*' )
-* write metrics to /var/log/disk_statistics.yaml
+
+* gather all smart disk statistics. (use: `snap-plugin-collector-smart`)
+* write metrics to /var/log/disk_statistics.log
 * schedule the task to run every minute
 * wait and verify the task ran successfully
 
@@ -391,18 +383,37 @@ $ sudo pcm.x
 
 Grafana provides real time visualization of telemetry data gathered by snap.
 
-* login to grafana at [http://localhost:3000](http://localhost:3000) (user: admin password: admin)
+resume the Grafana docker container:
+```
+$ docker ps -a
+CONTAINER ID        IMAGE                   COMMAND             CREATED             STATUS                  PORTS               NAMES
+b48300f9de2a        grafana/grafana:3.1.0   "/run.sh"           10 days ago         Exited (0) 5 days ago                       grafana-snap
+/o/s/e/tasks ❯❯❯ docker start b48300f9de2a
+b48300f9de2a
+docker ps
+CONTAINER ID        IMAGE                   COMMAND             CREATED             STATUS              PORTS                    NAMES
+b48300f9de2a        grafana/grafana:3.1.0   "/run.sh"           10 days ago         Up 3 seconds        0.0.0.0:3000->3000/tcp   grafana-snap
+
+* login to Grafana at [http://localhost:3000](http://localhost:3000) (user: admin password: admin)
 * navigate to the [app config page](http://localhost:3000/plugins/raintank-snap-app/edit) and enable snap app:
-* create a new datasouce with the following settings:
-    Name: "Snap"
-    Default: true
-    Type: Snap DS
-    URL: http://localhost:8181
-    Access: proxy
-* create a new dashboard with a graph panel:
-    Task Name: CPU Idle
+* click on the Grafana logo and [select data sources](http://localhost:3000/datasources)
+* create a [new data source](http://localhost:3000/datasources/new) with the following settings:
+    ```
+Name: "snap"
+Default: true
+Type: Snap DS
+URL: http://localhost:8181
+Access: proxy
+    ```
+* create a [new dashboard](http://localhost:3000/dashboard/new)
+** add a graph panel: (insert screenshot)
+** select 'snap' as Panel datasource: (insert screenshot)
+** create the following task:
+```
+    Task Name: memory active
     Interval: 200ms
-    Metrics: /intel/linux/iostat/avg-cpu/%idle
+    Metrics: /intel/procfs/meminfo/active
+```
 * click on watch and observe the metrics stream in
 
 ### Exercise

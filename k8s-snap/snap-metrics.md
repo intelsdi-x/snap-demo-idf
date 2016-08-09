@@ -9,7 +9,7 @@ In this section we will:
 
 Create granfana service
 ```
-$ kubectl create -f ./heapster
+$ kubectl create -f ~/kargo/configs/heapster
 ```
 
 Find and access grafana dashboard:

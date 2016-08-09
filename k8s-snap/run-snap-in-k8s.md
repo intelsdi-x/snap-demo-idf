@@ -9,7 +9,7 @@ In this section we will:
 
 review snap configuration file:
 ```
-$ cat snap/*.yaml
+$ cat ~/kargo/configs/snap/*.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -36,22 +36,22 @@ spec:
 
 deploy snap application:
 ```
-$ kubectl create -f snap/
+$ kubectl create -f ~/kargo/configs/snap/
 configmap "snap-config" created
 daemonset "snap" created
 ```
 
 ### Exercise:
 
-* Update ConfigMap tribe.seed value if necessary and deploy snap.
+* deploy snap into kubernetes
 * What snap plugins and tasks are running?
-* Use snap watch to observe a running tassk.
+* Use snap watch to observe a running task
 
 ### Snap Tribe
 
 ```
-$ snapctl tribe member
-$ snapctl tribe agreement
+$ snapctl member list
+$ snapctl agreement list
 ```
 
 ### Exercise
