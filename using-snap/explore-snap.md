@@ -2,27 +2,19 @@
 
 In this section we will:
 
-* start snapd service
-* load snap plugins
+* configure and start snapd service
+* manage snap plugins
+* determine available telemetry metrics
 * create and observe task
 * visualize telemetry data in Grafana
 
 ## Overview
 
-snapd: snap service daemon
-snapctl: snap commandline tool
+snap commands:
+* snapd: snap service daemon
+* snapctl: snap command line tool
 
-snap plugins
-* collectors
-* processors
-* publishers
-
-## snapd Service
-
-development/debug mode (ctrl+c to exit):
-```
-$ sudo snapd -t 0 -l 1
-```
+## `snapd` service
 
 start snapd service:
 ```
@@ -60,15 +52,24 @@ time="2016-06-07T16:19:44-07:00" level=debug msg="timeout chan start" _block=wai
 
 ### Exercise
 
-Update snapd.conf:
-* set `log_level: 1` (debug mode)
-* set `max-running-plugins: 5`
-* open a new terminal `tail -f /var/log/snap/snapd.log`
-* restart snapd service and verify changes in log file
+Update snapd.conf (edit as root: `sudo vim snapd.conf`):
+* set `log_level: 1` (debug log)
+* set `max_running_plugins: 5`
+* open a new terminal and monitor log file: `tail -f /var/log/snap/snapd.log`
+* restart snapd service and verify changes in log file output:
+    ```
+$ sudo systemctl restart snapd
+$ sudo systemctl status snapd
+    ```
 
-## snapd REST API
+    NOTE: if snapd service fails to start, troubleshoot in development debug mode (ctrl+c to exit):
+    ```
+$ sudo snapd -t 0 -l 1
+    ```
 
-snapctl commands corespond to snapd REST APIs:
+## `snapctl` command
+
+snapctl contains several sub-commands:
 
 ```
 $ snapctl
@@ -89,6 +90,56 @@ COMMANDS:
      task
 ```
 
+extract snap plugins:
+```
+$ cd ${HOME}/idflab/
+$ tar xvf snap-plugins.tar.gz
+```
+
+list available plugins (see [Plugin Catalog](http://snap-telemetry.io/plugins.html) for current list and plugins in development).
+```
+$ cd snap-v0.15.0-beta/plugin/
+$ ls
+snap-plugin-collector-apache         snap-plugin-collector-nova
+snap-plugin-collector-ceph           snap-plugin-collector-openfoam
+snap-plugin-collector-cinder         snap-plugin-collector-osv 
+...
+```
+
+load snap psutil plugin:
+```
+$ snapctl plugin load snap-plugin-collector-psutil
+Plugin loaded
+Name: psutil
+Version: 6
+Type: collector
+Signed: false
+Loaded Time: Thu, 21 Jul 2016 11:29:21 PDT
+```
+
+list metrics exposed by plugins:
+```
+$ snapctl metric list | less
+NAMESPACE                  VERSIONS
+/intel/psutil/cpu0/guest          6
+/intel/psutil/cpu0/guest_nice     6
+/intel/psutil/cpu0/idle           6
+/intel/psutil/cpu0/iowait         6
+/intel/psutil/cpu0/irq            6
+/intel/psutil/cpu0/nice           6
+```
+
+### Exercise
+
+Extract snap plugins, and use snapctl command to:
+* load `snap-plugin-collector-meminfo` plugin
+* list meminfo metrics (hint: `... | grep meminfo`)
+* unload `snap-plugin-collector-meminfo` (hint: use `snapctl plugin list` to get necessary info)
+* load `snap-plugin-collector-smart` plugin
+
+## snap REST API
+
+snapctl is retrieving data from snapd REST API:
 ```
 $ curl -L localhost:8181/v1/metrics
 {
@@ -130,63 +181,16 @@ $ curl -L localhost:8181/v1/tasks
 }
 ```
 
-## Load Plugin
-
-extract snap plugins:
-```
-$ cd ${HOME}/idflab/
-$ tar xvf snap-plugins.tar.gz
-```
-
-currently available plugins:
-```
-$ cd snap-v0.15.0-beta/plugin/
-$ ls
-snap-plugin-collector-apache         snap-plugin-collector-nova
-snap-plugin-collector-ceph           snap-plugin-collector-openfoam
-snap-plugin-collector-cinder         snap-plugin-collector-osv 
-...
-```
-
-load snap psutil plugin:
-```
-$ snapctl plugin load snap-plugin-collector-psutil
-Plugin loaded
-Name: psutil
-Version: 6
-Type: collector
-Signed: false
-Loaded Time: Thu, 21 Jul 2016 11:29:21 PDT
-```
-
-list metrics exposed by plugins:
-```
-$ snapctl metric list | less
-NAMESPACE                  VERSIONS
-/intel/psutil/cpu0/guest          6
-/intel/psutil/cpu0/guest_nice     6
-/intel/psutil/cpu0/idle           6
-/intel/psutil/cpu0/iowait         6
-/intel/psutil/cpu0/irq            6
-/intel/psutil/cpu0/nice           6
-```
-
-### Excercise
-
-Use snapctl command to:
-* load `snap-plugin-collector-meminfo` plugin
-* list meminfo metrics (hint: `... | grep meminfo | less`)
-* unload `snap-plugin-collector-meminfo` (hint: use `snapctl plugin list` to get necessary info)
-* load `snap-plugin-collector-smart` plugin
+### Exercise
 
 Use curl and REST API to:
-* list available metrics in REST (hint: `curl ... | jq | less`)
-* list single metric in REST
+* list all available metrics in REST (hint: `curl ... | jq`)
+* list a single metric in REST
 * what does /intel/psutil/vm/inactive metrics collect? (for more info see [metrics 2.0](http://metrics20.org/))
 
-## Writing task
+## Running telemetry tasks
 
-We ship example task manifests.
+snap package includes several example tasks:
 ```
 $ tree /opt/snap/examples/tasks
 /opt/snap/examples/tasks
@@ -201,6 +205,7 @@ $ tree /opt/snap/examples/tasks
 `-- README.md
 ```
 
+review an example task:
 ```
 $ cat /opt/snap/examples/tasks/psutil-file_no-processor.yaml
 ---
@@ -221,7 +226,63 @@ $ cat /opt/snap/examples/tasks/psutil-file_no-processor.yaml
             file: "/tmp/snap_published_demo_file.log"
 ```
 
-### task schedule
+create task from config file:
+```
+$ snapctl task create -t /opt/snap/examples/tasks/psutil-file_no-processor.yaml
+Using task manifest to create task
+Task created
+ID: 8f3f3994-6341-49e3-bd96-10ec364e3263
+Name: Task-8f3f3994-6341-49e3-bd96-10ec364e3263
+State: Running
+```
+
+list all tasks:
+```
+$ snapctl task list
+ID                                        NAME                                           STATE        HIT     MISS   FAIL   CREATED              LAST FAILURE
+8f3f3994-6341-49e3-bd96-10ec364e3263      Task-8f3f3994-6341-49e3-bd96-10ec364e3263      Running      16      0      0      11:41AM 7-21-2016
+```
+
+watch running tasks:
+```
+$ snapctl task watch 8f3f3994-6341-49e3-bd96-10ec364e3263
+Watching Task (8f3f3994-6341-49e3-bd96-10ec364e3263):
+NAMESPACE                     DATA      TIMESTAMP
+/intel/psutil/load/load1      0.01      2016-07-21 11:44:16.507440345 -0700 PDT
+/intel/psutil/load/load15     0.05      2016-07-21 11:44:16.507451551 -0700 PDT
+```
+
+see output in file:
+```
+$ tail -f /tmp/snap_published_demo_file.log
+[{"namespace":[{"Value":"intel","Description":"","Name":""},{"Value":"psutil","Description":"","Name":""},{"Value":"load","Description":"","Name":""},{"Value":"load1","Description":"","Name":""}],"last_advertised_time":"0001-01-01T00:00:00Z","version":0,"config":null,"data":0,"tags":{"plugin_running_on":"ubuntu1604"},"Unit_":"Load/1M","description":"","timestamp":"2016-07-21T11:49:47.705315535-07:00"},{"namespace":[{"Value":"intel","Description":"","Name":""},{"Value":"psutil","Description":"","Name":""},{"Value":"load","Description":"","Name":""},{"Value":"load15","Description":"","Name":""}],"last_advertised_time":"0001-01-01T00:00:00Z","version":0,"config":null,"data":0.05,"tags":{"plugin_running_on":"ubuntu1604"},"Unit_":"Load/15M","description":"","timestamp":"2016-07-21T11:49:47.705328457-07:00"},{"namespace":[{"Value":"intel","Description":"","Name":""},{"Value":"psutil","Description":"","Name":""},{"Value":"load","Description":"","Name":""},{"Value":"load5","Description":"","Name":""}],"last_advertised_time":"0001-01-01T00:00:00Z","version":0,"config":null,"data":0.01,"tags":{"plugin_running_on":"ubuntu1604"},"Unit_":"Load/5M","description":"","timestamp":"2016-07-21T11:49:47.705337407-07:00"}]
+
+$ tail -1 /tmp/snap_published_demo_file.log | jq
+```
+
+stop task:
+```
+$ snapctl task stop 8f3f3994-6341-49e3-bd96-10ec364e3263
+Task stopped:
+ID: 8f3f3994-6341-49e3-bd96-10ec364e3263
+```
+
+### Exercise
+
+* load snap plugin `snap-plugin-publisher-file`
+* run the example task `/opt/snap/examples/tasks/psutil-file_no-processor.yaml`
+* verify the task is running successfully
+* stop the psutil task `snapctl task stop ...`
+
+## Writing tasks
+
+snap task processes telemetry data correspond with the three types of plugins availble:
+* collectors
+* processors
+* publishers
+
+### task scheduling
+
 snap schedule supports:
 * simple (run forever on given interval)
 * window (repeat interval between start/stop time)
@@ -249,7 +310,8 @@ Loaded Time: Thu, 21 Jul 2016 11:31:52 PDT
 ```
 
 ### task metrics
-snap collect matrics can be a concrete namspace, a wildcard `*`, or a tuple `(a|b)`.
+
+snap collect metrics can be a concrete namespace, a wildcard `*`, or a tuple `(a|b)`.
 
 As an example the mock plugin with the metrics:
 * /intel/mock/foo/ex1
@@ -264,64 +326,15 @@ As an example the mock plugin with the metrics:
 | /intel/mock/foo/(ex1/ex2) | /intel/mock/foo/ex1 </br> /intel/mock/foo/ex2|
 | /intel/mock/\*/ex1) | /intel/mock/foo/ex1 </br> /intel/mock/bar/ex1 |
 
-create tasks from config file:
-```
-$ snapctl task create -t /opt/snap/examples/tasks/psutil-file_no-processor.yaml
-Using task manifest to create task
-Task created
-ID: 8f3f3994-6341-49e3-bd96-10ec364e3263
-Name: Task-8f3f3994-6341-49e3-bd96-10ec364e3263
-State: Running
-```
-
-## Task Lifecycle
-
-list all tasks:
-```
-$ snapctl task list
-ID                      NAME                      STATE          HIT      MISS      FAIL      CREATED          LAST FAILURE
-8f3f3994-6341-49e3-bd96-10ec364e3263      Task-8f3f3994-6341-49e3-bd96-10ec364e3263      Running      16      0      0      11:41AM 7-21-2016
-```
-
-watch running tasks:
-```
-$ snapctl task watch 8f3f3994-6341-49e3-bd96-10ec364e3263
-Watching Task (8f3f3994-6341-49e3-bd96-10ec364e3263):
-NAMESPACE              DATA      TIMESTAMP
-/intel/psutil/load/load1      0.01      2016-07-21 11:44:16.507440345 -0700 PDT
-/intel/psutil/load/load15      0.05      2016-07-21 11:44:16.507451551 -0700 PDT
-```
-
-see output in file:
-```
-$ tail -f /tmp/snap_published_demo_file.log
-[{"namespace":[{"Value":"intel","Description":"","Name":""},{"Value":"psutil","Description":"","Name":""},{"Value":"load","Description":"","Name":""},{"Value":"load1","Description":"","Name":""}],"last_advertised_time":"0001-01-01T00:00:00Z","version":0,"config":null,"data":0,"tags":{"plugin_running_on":"ubuntu1604"},"Unit_":"Load/1M","description":"","timestamp":"2016-07-21T11:49:47.705315535-07:00"},{"namespace":[{"Value":"intel","Description":"","Name":""},{"Value":"psutil","Description":"","Name":""},{"Value":"load","Description":"","Name":""},{"Value":"load15","Description":"","Name":""}],"last_advertised_time":"0001-01-01T00:00:00Z","version":0,"config":null,"data":0.05,"tags":{"plugin_running_on":"ubuntu1604"},"Unit_":"Load/15M","description":"","timestamp":"2016-07-21T11:49:47.705328457-07:00"},{"namespace":[{"Value":"intel","Description":"","Name":""},{"Value":"psutil","Description":"","Name":""},{"Value":"load","Description":"","Name":""},{"Value":"load5","Description":"","Name":""}],"last_advertised_time":"0001-01-01T00:00:00Z","version":0,"config":null,"data":0.01,"tags":{"plugin_running_on":"ubuntu1604"},"Unit_":"Load/5M","description":"","timestamp":"2016-07-21T11:49:47.705337407-07:00"}]
-
-$ tail -1 /tmp/snap_published_demo_file.log | jq
-```
-
-stop task:
-```
-$ snapctl task stop 8f3f3994-6341-49e3-bd96-10ec364e3263
-Task stopped:
-ID: 8f3f3994-6341-49e3-bd96-10ec364e3263
-```
-
 ### Exercise
-
-Write a new task:
 * gather all smart disk statistics. (hint use: '*' )
 * write metrics to /var/log/disk_statistics.yaml
-* run nightly at 3:00 AM.
-* run it once to verify it works.
-
-Manage tasks:
-* delete psutil task
-* disable smart task
+* schedule the task to run every minute
+* wait and verify the task ran successfully
 
 ## Intel Performance Counter Monitor(PCM)
 
-Intel Performance Counter Monitor(PCM) offers a rich set of CPU metrics:
+[Intel Performance Counter Monitor(PCM)](https://software.intel.com/en-us/articles/intel-performance-counter-monitor) offers a rich set of CPU metrics:
 ```
  EXEC  : instructions per nominal CPU cycle
  IPC   : instructions per CPU cycle
@@ -342,6 +355,7 @@ Intel Performance Counter Monitor(PCM) offers a rich set of CPU metrics:
 
 See example of Intel PCM data:
 ```
+$ sudo modprobe msr
 $ sudo pcm.x
  Core (SKT) | EXEC | IPC  | FREQ  | AFREQ | L3MISS | L2MISS | L3HIT | L2HIT | L3MPI | L2MPI | TEMP
 
@@ -373,12 +387,6 @@ $ sudo pcm.x
 ---------------------------------------------------------------------------------------------------------------
 ```
 
-### Exercise
-
-* load snap plugin collector pcm
-* load snap plugin processor movingaverage
-* write snap task to gather pcm.x TEMP values and 5 sample size moving average.
-
 ## Grafana
 
 Grafana provides real time visualization of telemetry data gathered by snap.
@@ -397,6 +405,16 @@ Grafana provides real time visualization of telemetry data gathered by snap.
     Metrics: /intel/linux/iostat/avg-cpu/%idle
 * click on watch and observe the metrics stream in
 
-### Excercise
+### Exercise
 
-* observe pcm.x data in Grafana
+* review pcm.x data:
+** `sudo modprobe msr`
+** `sudo pcm.x`
+* load `snap-plugin-collector-pcm`
+* observe pcm.x temperature data in Grafana in 1 sec interval
+* generate cpu load and observe changes `dd if=/dev/urandom | bzip2 -9 > /dev/null`
+
+### Extra Exercise
+
+* load `snap-plugin-processor-movingaverage`
+* write snap task to gather pcm.x TEMP values and 5 sample size moving average.
