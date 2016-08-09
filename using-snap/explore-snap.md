@@ -407,9 +407,9 @@ URL: http://localhost:8181
 Access: proxy
     ```
 * create a [new dashboard](http://localhost:3000/dashboard/new)
-** add a graph panel: (insert screenshot)
-** select 'snap' as Panel datasource: (insert screenshot)
-** create the following task:
+    * add a graph panel: (insert screenshot)
+    * select 'snap' as Panel datasource: (insert screenshot)
+    * create the following task:
     ```
 Task Name: memory active
 Interval: 200ms
@@ -419,10 +419,10 @@ Metrics: /intel/procfs/meminfo/active
 
 ### Exercise
 
-* review pcm.x data:
-** `sudo modprobe msr`
-** `sudo pcm.x`
-* load `snap-plugin-collector-pcm`
+* review pcm.x metrics:
+    * `sudo modprobe msr`
+    * `sudo pcm.x`
+* load `snap-plugin-collector-pcm` plugin
 * observe pcm.x temperature data in Grafana in 1 sec interval
 * generate cpu load and observe changes `dd if=/dev/urandom | bzip2 -9 > /dev/null`
 
