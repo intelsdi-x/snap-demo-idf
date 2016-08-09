@@ -393,6 +393,7 @@ b48300f9de2a
 docker ps
 CONTAINER ID        IMAGE                   COMMAND             CREATED             STATUS              PORTS                    NAMES
 b48300f9de2a        grafana/grafana:3.1.0   "/run.sh"           10 days ago         Up 3 seconds        0.0.0.0:3000->3000/tcp   grafana-snap
+```
 
 * login to Grafana at [http://localhost:3000](http://localhost:3000) (user: admin password: admin)
 * navigate to the [app config page](http://localhost:3000/plugins/raintank-snap-app/edit) and enable snap app:
@@ -409,11 +410,11 @@ Access: proxy
 ** add a graph panel: (insert screenshot)
 ** select 'snap' as Panel datasource: (insert screenshot)
 ** create the following task:
-```
-    Task Name: memory active
-    Interval: 200ms
-    Metrics: /intel/procfs/meminfo/active
-```
+    ```
+Task Name: memory active
+Interval: 200ms
+Metrics: /intel/procfs/meminfo/active
+    ```
 * click on watch and observe the metrics stream in
 
 ### Exercise
