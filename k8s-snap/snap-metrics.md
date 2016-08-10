@@ -29,7 +29,7 @@ kubernetes Horizontal Pod Autoscaling (HPA) uses heapster to monitor pod activit
 
 create php application:
 ```
-$ kubectl run php-apache --image=gcr.io/google_containers/hpa-example --requests=cpu=200m --expose --port=80
+$ kubectl run php-apache --image=localhost:5000/hpa-example --requests=cpu=200m --expose --port=80
 service "php-apache" created
 deployment "php-apache" created
 ```

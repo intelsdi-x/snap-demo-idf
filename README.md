@@ -22,3 +22,4 @@ Documentation is available under `k8s-snap`.
 * [Kubernetes 101](k8s-snap/k8s-101.md)
 * [Running Snap in Kubernetes](k8s-snap/run-snap-in-k8s.md)
 * [Snap metrics in Grafana](k8s-snap/snap-metrics.md)
+* [Kubernetes Troubleshooting](k8s-snap/k8s-troubleshoot.md)

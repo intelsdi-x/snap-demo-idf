@@ -270,8 +270,8 @@ ID: 8f3f3994-6341-49e3-bd96-10ec364e3263
 ### Exercise
 
 * ensure the following plugins are load
-** `snap-plugin-collector-psutil`
-** `snap-plugin-publisher-file`
+    * `snap-plugin-collector-psutil`
+    * `snap-plugin-publisher-file`
 * run the example task `/opt/snap/examples/tasks/psutil-file_no-processor.yaml`
 * verify the task is running successfully (`tail -1 ... | jq`)
 * stop the psutil task `snapctl task stop ...`
@@ -398,10 +398,11 @@ b48300f9de2a        grafana/grafana:3.1.0   "/run.sh"           10 days ago     
 * login to Grafana at [http://localhost:3000](http://localhost:3000) (user: admin password: admin)
 * navigate to the [app config page](http://localhost:3000/plugins/raintank-snap-app/edit) and enable snap app:
 * click on the Grafana logo and [select data sources](http://localhost:3000/datasources)
-* create a [new data source](http://localhost:3000/datasources/new) with the following settings:
+* create a [new data source](http://localhost:3000/datasources/new)
+    use the following settings:
     ```
 Name: "snap"
-Default: true
+Default: true (checkbox)
 Type: Snap DS
 URL: http://localhost:8181
 Access: proxy
