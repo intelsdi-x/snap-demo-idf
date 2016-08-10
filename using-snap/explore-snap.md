@@ -52,7 +52,7 @@ time="2016-06-07T16:19:44-07:00" level=debug msg="timeout chan start" _block=wai
 
 ### Exercise
 
-Update snapd.conf (edit as root: `sudo vim snapd.conf`):
+Update snapd.conf (edit as root: `sudo vim /etc/snap/snapd.conf`):
 * set `log_level: 1` (debug log)
 * set `max_running_plugins: 5`
 * open a new terminal and monitor log file: `tail -f /var/log/snap/snapd.log`
@@ -136,6 +136,7 @@ Extract snap plugins, and use snapctl command to:
 * list meminfo metrics (hint: `... | grep meminfo`)
 * unload `snap-plugin-collector-meminfo` (hint: use `snapctl plugin list` to get necessary info)
 * load `snap-plugin-collector-smart` plugin
+* load `snap-plugin-publisher-file` plugin
 
 ## snap REST API
 
@@ -400,6 +401,7 @@ b48300f9de2a        grafana/grafana:3.1.0   "/run.sh"           10 days ago     
 * click on the Grafana logo and [select data sources](http://localhost:3000/datasources)
 * create a [new data source](http://localhost:3000/datasources/new)
     use the following settings:
+
     ```
 Name: "snap"
 Default: true (checkbox)
@@ -407,6 +409,7 @@ Type: Snap DS
 URL: http://localhost:8181
 Access: proxy
     ```
+
 * create a [new dashboard](http://localhost:3000/dashboard/new)
     * add a graph panel: (insert screenshot)
     * select 'snap' as Panel datasource: (insert screenshot)
