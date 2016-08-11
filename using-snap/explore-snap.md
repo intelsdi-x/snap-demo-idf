@@ -398,9 +398,11 @@ b48300f9de2a        grafana/grafana:3.1.0   "/run.sh"           10 days ago     
 
 * login to Grafana at [http://localhost:3000](http://localhost:3000) (user: admin password: admin)
 * navigate to the [app config page](http://localhost:3000/plugins/raintank-snap-app/edit) and enable snap app:
+![enable snap](./images/enable_snap.gif)
+
 * click on the Grafana logo and [select data sources](http://localhost:3000/datasources)
-* create a [new data source](http://localhost:3000/datasources/new)
-    use the following settings:
+![add datasource](./images/datasource.gif)
+    create a [new data source](http://localhost:3000/datasources/new) use the following settings:
 
     ```
 Name: "snap"
@@ -411,6 +413,7 @@ Access: proxy
     ```
 
 * create a [new dashboard](http://localhost:3000/dashboard/new)
+![create dashboard](./images/dashboard.gif)
     * add a graph panel: (insert screenshot)
     * select 'snap' as Panel datasource: (insert screenshot)
     * create the following task:
