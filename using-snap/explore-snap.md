@@ -432,7 +432,6 @@ Metrics: /intel/procfs/meminfo/active
 * observe pcm.x temperature data in Grafana in 1 sec interval
 * generate cpu load and observe changes `dd if=/dev/urandom | bzip2 -9 > /dev/null`
 
-### Extra Exercise
+### Wait... There's More
 
-* load `snap-plugin-processor-movingaverage`
-* write snap task to gather pcm.x TEMP values and 5 sample size moving average.
+If you have extra time, play around with adding more tasks in Grafana.
