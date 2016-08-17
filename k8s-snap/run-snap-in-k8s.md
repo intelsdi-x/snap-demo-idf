@@ -57,4 +57,3 @@ $ snapctl agreement list
 ### Exercise
 
 * Create a new snap cpu task and verify it's deployed to all members.
-* Create a new agreement and add tribe member.
