@@ -1,15 +1,9 @@
 
-Welcome to IDF! Here is the lab work you'll be up to for the next two hours.
-
-## What's running: 
-
-* Laptop with Intel i7 Skylake processor
-* Ubuntu 16.04
-* Snap 0.15.0
-* Kubernetes 1.3.0
+Welcome! The IDF Snap Lab instructions have been updated to allow anyone to follow along with a VM. However some exercises might no behave correctly unless you have an Intel Skylake processor running Ubuntu 16.04. 
 
 ## Labs
-Today's lab will go through each section below: 
+
+The lab will go through each section below: 
 
 ### Using Snap
 Documentation is available under `using-snap`.

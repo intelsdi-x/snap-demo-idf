@@ -1,29 +1,23 @@
 ## Install Snap
 
-list package content:
-```
-$ dpkg-deb -c ${HOME}/idflab/snap-telemetry_0.15.0-1xenial_amd64.deb
-drwxr-xr-x 0/0               0 2016-07-15 16:21 ./
-drwxr-xr-x 0/0               0 2016-07-15 16:21 ./opt/
-drwxr-xr-x 0/0               0 2016-07-15 16:21 ./opt/snap/
-drwxr-xr-x 0/0               0 2016-07-15 16:21 ./opt/snap/bin/
--rwxr-xr-x 0/0        16977919 2016-07-15 16:21 ./opt/snap/bin/snapd
--rwxr-xr-x 0/0         9554554 2016-07-15 16:21 ./opt/snap/bin/snapctl
-...
-```
 
-install snap:
+Setup repository and install snap using packages:
 
-```
-$ sudo dpkg -i ${HOME}/idflab/snap-telemetry_0.15.0-1xenial_amd64.deb
-(Reading database ... 59710 files and directories currently installed.)
-Preparing to unpack snap-telemetry_0.15.0-1xenial_amd64.deb ...
-Unpacking snap-telemetry (0.15.0-1xenial) over (0.15.0-1xenial) ...
-Setting up snap-telemetry (0.15.0-1xenial) ...
-Processing triggers for man-db (2.7.5-1) ...
-```
+* For Ubuntu 16.04/14.04:
 
-snap man pages:
+    ```
+$ curl -s https://packagecloud.io/install/repositories/intelsdi-x/snap/script.deb.sh | sudo bash
+    ```
+
+* RedHat/CentOS 6/7:
+
+    ```
+$ curl -s https://packagecloud.io/install/repositories/intelsdi-x/snap/script.rpm.sh | sudo bash
+    ```
+
+Other installation options and package binary available at [packagecloud.io](https://packagecloud.io/intelsdi-x/snap/install)
+
+Verify snap is installed and available:
 ```
 $ man snapd
 $ man snapctl
