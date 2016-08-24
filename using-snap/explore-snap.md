@@ -211,8 +211,6 @@ see output in file:
 ```
 $ tail -f /tmp/cpu_stat.log
 [{"namespace":[{"Value":"intel","Description":"","Name":""},{"Value":"linux","Description":"","Name":""},{"Value":"iostat","Description":"","Name":""},{"Value":"avg-cpu","Description":"","Name":""},{"Value":"%idle","Description":"","Name":""}],"last_advertised_time":"0001-01-01T00:00:00Z","version":0,"config":null,"data":99.5,"tags":{"plugin_running_on":"4f8b31013a70"},"Unit_":"","description":"","timestamp":"2016-08-24T18:25:13.349462826Z"},{"namespace":[{"Value":"intel","Description":"","Name":""},{"Value":"linux","Description":"","Name":""},{"Value":"iostat","Description":"","Name":""},{"Value":"avg-cpu","Description":"","Name":""},{"Value":"%system","Description":"","Name":""}],"last_advertised_time":"0001-01-01T00:00:00Z","version":0,"config":null,"data":0,"tags":{"plugin_running_on":"4f8b31013a70"},"Unit_":"","description":"","timestamp":"2016-08-24T18:25:13.34946832Z"},{"namespace":[{"Value":"intel","Description":"","Name":""},{"Value":"linux","Description":"","Name":""},{"Value":"iostat","Description":"","Name":""},{"Value":"avg-cpu","Description":"","Name":""},{"Value":"%user","Description":"","Name":""}],"last_advertised_time":"0001-01-01T00:00:00Z","version":0,"config":null,"data":0.5,"tags":{"plugin_running_on":"4f8b31013a70"},"Unit_":"","description":"","timestamp":"2016-08-24T18:25:13.349471916Z"}]
-
-$ tail -1 /tmp/cpu_stat.log | jq
 ```
 
 stop task:
@@ -227,8 +225,8 @@ ID: 8f3f3994-6341-49e3-bd96-10ec364e3263
 * ensure the following plugins are load
     * `snap-plugin-collector-iostat`
     * `snap-plugin-publisher-file`
-* run the example task `/opt/snap/examples/tasks/iostat.yaml`
-* verify the task is running successfully (`tail -1 ... | jq`)
+* create a task using the example `/opt/snap/examples/tasks/iostat.yaml`
+* verify the task is running successfully (`tail -1 /tmp/cpu_stat.log | jq`)
 * stop the psutil task `snapctl task stop ...`
 
 ## Writing tasks
@@ -282,12 +280,6 @@ As an example the mock plugin with the metrics:
 ## Grafana
 
 Grafana provides real time visualization of telemetry data gathered by snap.
-
-resume the Grafana docker container:
-```
-$ docker pull grafana/grafana:3.1.0
-$ docker run 
-```
 
 * login to Grafana at [http://localhost:3000](http://localhost:3000) (user: admin password: admin)
 * navigate to the [app config page](http://localhost:3000/plugins/raintank-snap-app/edit) and enable snap app:
