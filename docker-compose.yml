@@ -1,0 +1,19 @@
+version: "2"
+
+services:
+  snap:
+    build: ./snap
+    container_name: snap
+    ports:
+      - "8181:8181"
+    tty: true
+
+  grafana:
+    image: grafana/grafana:3.1.0
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_INSTALL_PLUGINS: grafana-clock-panel,raintank-snap-app
+    depends_on:
+      - snap

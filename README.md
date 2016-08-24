@@ -1,9 +1,9 @@
 
-Welcome! The IDF Snap Lab instructions have been updated to allow anyone to follow along with a VM. However some exercises might no behave correctly unless you have an Intel Skylake processor running Ubuntu 16.04. 
+Welcome! The IDF Snap Lab instructions have been updated to allow anyone to follow along the "Using Snap" exercises with docker and docker-compose. The Kubernetes exercise requires vagrant and virtualbox.
 
 ## Labs
 
-The lab will go through each section below: 
+The lab will go through each section below:
 
 ### Using Snap
 Documentation is available under `using-snap`.

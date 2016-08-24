@@ -2,74 +2,22 @@
 
 In this section we will:
 
-* configure and start snapd service
 * manage snap plugins
 * determine available telemetry metrics
 * create and observe task
 * visualize telemetry data in Grafana
+
+NOTE: The Snap exercises in this lab can be performed by logging into the snap container. This section assumes any commands are executed within the snap container:
+```
+$ docker-compose  exec snap /bin/bash
+root@ab2b16b4ccc9:/#
+```
 
 ## Overview
 
 snap commands:
 * snapd: snap service daemon
 * snapctl: snap command line tool
-
-## `snapd` service
-
-Start snap daemon using the appropriate service command:
-
-* init.d service:
-```
-$ service snapd start
-$ service snapd status
-```
-
-* systemd service:
-```
-$ sudo systemctl daemon-reload
-$ sudo systemctl start snapd
-$ sudo systemctl status snapd
-* snapd.service - Snap daemon
-   Loaded: loaded (/lib/systemd/system/snapd.service; enabled; vendor preset: e
-   Active: active (running) since Tue 2016-06-07 16:19:33 PDT; 1 months 13 days
-     Docs: man:snapd(8)
-           man:snapctl(1)
-  Process: 2869 ExecStop=/bin/kill -INT $MAINPID (code=exited, status=0/SUCCESS
- Main PID: 3149 (snapd)
-    Tasks: 9 (limit: 512)
-   CGroup: /system.slice/snapd.service
-           `-3149 /usr/bin/snapd
-```
-
-snapd configuration files:
-```
-$ tree /etc/snap
-/etc/snap/
-|-- keyrings
-`-- snapd.conf
-```
-
-examine snapd logs:
-```
-$ tail -f /var/log/snap/snapd.log
-...
-time="2016-06-07T16:19:44-07:00" level=info msg="plugin load called" _block=load _module=control
-time="2016-06-07T16:19:44-07:00" level=info msg="plugin load called" _block=load-plugin _module=control-plugin-mgr path=snap-plugin-collector-cpu
-time="2016-06-07T16:19:44-07:00" level=debug msg="timeout chan start" _block=waitHandling _module=control-plugin-execution
-```
-
-### Exercise
-
-Update snapd.conf (edit as root: `sudo vim /etc/snap/snapd.conf`):
-* set `log_level: 1` (debug log)
-* set `max_running_plugins: 5`
-* open a new terminal and monitor log file: `tail -f /var/log/snap/snapd.log`
-* restart snapd service and verify changes in log file output:
-
-    NOTE: if snapd service fails to start, troubleshoot in development debug mode (ctrl+c to exit):
-    ```
-$ sudo snapd -l 1
-    ```
 
 ## `snapctl` command
 
@@ -94,17 +42,9 @@ COMMANDS:
      task
 ```
 
-download and extract snap plugins:
-```
-$ mkdir -p ${HOME}/idflab/
-$ cd ${HOME}/idflab/
-$ curl -fL https://github.com/intelsdi-x/snap/releases/download/v0.15.0-beta/snap-plugins-v0.15.0-beta-linux-amd64.tar.gz -o snap-plugins.tar.gz
-$ tar xvf snap-plugins.tar.gz
-```
-
 list available plugins (see [Plugin Catalog](http://snap-telemetry.io/plugins.html) for current list and plugins in development).
 ```
-$ cd snap-v0.15.0-beta/plugin/
+$ cd /tmp/plugins/snap-v0.15.0-beta/plugin
 $ ls
 snap-plugin-collector-apache         snap-plugin-collector-nova
 snap-plugin-collector-ceph           snap-plugin-collector-openfoam
@@ -126,7 +66,7 @@ Loaded Time: Thu, 21 Jul 2016 11:29:21 PDT
 list metrics exposed by plugins:
 ```
 $ snapctl metric list | less
-NAMESPACE                  VERSIONS
+NAMESPACE                         VERSION
 /intel/psutil/cpu0/guest          6
 /intel/psutil/cpu0/guest_nice     6
 /intel/psutil/cpu0/idle           6
@@ -135,13 +75,28 @@ NAMESPACE                  VERSIONS
 /intel/psutil/cpu0/nice           6
 ```
 
+list loaded plugins:
+```
+$ snapctl plugin list
+NAME   VERSION   TYPE      SIGNED    STATUS    LOADED TIME
+psutil   6     collector   false     loaded    Wed, 24 Aug 2016 17:33:52 UTC
+```
+
+unload plugin requires the plugin version (because snap supports multiple versions of the same plugin):
+```
+$ snapctl plugin unload collector:psutil:6
+Plugin unloaded
+Name: psutil
+Version: 6
+Type: collector
+```
+
 ### Exercise
 
 Extract snap plugins, and use snapctl command to:
 * load `snap-plugin-collector-meminfo` plugin
 * list meminfo metrics (hint: `... | grep meminfo`)
 * unload `snap-plugin-collector-meminfo` (hint: use `snapctl plugin list` to get necessary info)
-* load `snap-plugin-collector-smart` plugin
 * load `snap-plugin-publisher-file` plugin
 
 ## snap REST API
@@ -201,20 +156,12 @@ snap package includes several example tasks:
 ```
 $ tree /opt/snap/examples/tasks
 /opt/snap/examples/tasks
-|-- ceph-file.json
-|-- distributed-mock-file.json
-|-- mock-file.json
-|-- mock-file.yaml
-|-- mock_tagged-file.json
-|-- psutil-file_no-processor.yaml
-|-- psutil-file.yaml
-|-- psutil-influx.json
-`-- README.md
+`-- iostat.yaml
 ```
 
 review an example task:
 ```
-$ cat /opt/snap/examples/tasks/psutil-file_no-processor.yaml
+$ cat /opt/snap/examples/tasks/iostat.yaml
 ---
   version: 1
   schedule:
@@ -235,7 +182,7 @@ $ cat /opt/snap/examples/tasks/psutil-file_no-processor.yaml
 
 create task from config file:
 ```
-$ snapctl task create -t /opt/snap/examples/tasks/psutil-file_no-processor.yaml
+$ snapctl task create -t /opt/snap/examples/tasks/iostat.yaml
 Using task manifest to create task
 Task created
 ID: 8f3f3994-6341-49e3-bd96-10ec364e3263
@@ -254,17 +201,18 @@ watch running tasks:
 ```
 $ snapctl task watch 8f3f3994-6341-49e3-bd96-10ec364e3263
 Watching Task (8f3f3994-6341-49e3-bd96-10ec364e3263):
-NAMESPACE                     DATA      TIMESTAMP
-/intel/psutil/load/load1      0.01      2016-07-21 11:44:16.507440345 -0700 PDT
-/intel/psutil/load/load15     0.05      2016-07-21 11:44:16.507451551 -0700 PDT
+NAMESPACE                              DATA       TIMESTAMP
+/intel/linux/iostat/avg-cpu/%idle      99.49      2016-08-24 18:23:55.208406929 +0000 UTC
+/intel/linux/iostat/avg-cpu/%system    0.51       2016-08-24 18:23:55.208413522 +0000 UTC
+/intel/linux/iostat/avg-cpu/%user      0          2016-08-24 18:23:55.208418416 +0000 UTC
 ```
 
 see output in file:
 ```
-$ tail -f /tmp/snap_published_demo_file.log
-[{"namespace":[{"Value":"intel","Description":"","Name":""},{"Value":"psutil","Description":"","Name":""},{"Value":"load","Description":"","Name":""},{"Value":"load1","Description":"","Name":""}],"last_advertised_time":"0001-01-01T00:00:00Z","version":0,"config":null,"data":0,"tags":{"plugin_running_on":"ubuntu1604"},"Unit_":"Load/1M","description":"","timestamp":"2016-07-21T11:49:47.705315535-07:00"},{"namespace":[{"Value":"intel","Description":"","Name":""},{"Value":"psutil","Description":"","Name":""},{"Value":"load","Description":"","Name":""},{"Value":"load15","Description":"","Name":""}],"last_advertised_time":"0001-01-01T00:00:00Z","version":0,"config":null,"data":0.05,"tags":{"plugin_running_on":"ubuntu1604"},"Unit_":"Load/15M","description":"","timestamp":"2016-07-21T11:49:47.705328457-07:00"},{"namespace":[{"Value":"intel","Description":"","Name":""},{"Value":"psutil","Description":"","Name":""},{"Value":"load","Description":"","Name":""},{"Value":"load5","Description":"","Name":""}],"last_advertised_time":"0001-01-01T00:00:00Z","version":0,"config":null,"data":0.01,"tags":{"plugin_running_on":"ubuntu1604"},"Unit_":"Load/5M","description":"","timestamp":"2016-07-21T11:49:47.705337407-07:00"}]
+$ tail -f /tmp/cpu_stat.log
+[{"namespace":[{"Value":"intel","Description":"","Name":""},{"Value":"linux","Description":"","Name":""},{"Value":"iostat","Description":"","Name":""},{"Value":"avg-cpu","Description":"","Name":""},{"Value":"%idle","Description":"","Name":""}],"last_advertised_time":"0001-01-01T00:00:00Z","version":0,"config":null,"data":99.5,"tags":{"plugin_running_on":"4f8b31013a70"},"Unit_":"","description":"","timestamp":"2016-08-24T18:25:13.349462826Z"},{"namespace":[{"Value":"intel","Description":"","Name":""},{"Value":"linux","Description":"","Name":""},{"Value":"iostat","Description":"","Name":""},{"Value":"avg-cpu","Description":"","Name":""},{"Value":"%system","Description":"","Name":""}],"last_advertised_time":"0001-01-01T00:00:00Z","version":0,"config":null,"data":0,"tags":{"plugin_running_on":"4f8b31013a70"},"Unit_":"","description":"","timestamp":"2016-08-24T18:25:13.34946832Z"},{"namespace":[{"Value":"intel","Description":"","Name":""},{"Value":"linux","Description":"","Name":""},{"Value":"iostat","Description":"","Name":""},{"Value":"avg-cpu","Description":"","Name":""},{"Value":"%user","Description":"","Name":""}],"last_advertised_time":"0001-01-01T00:00:00Z","version":0,"config":null,"data":0.5,"tags":{"plugin_running_on":"4f8b31013a70"},"Unit_":"","description":"","timestamp":"2016-08-24T18:25:13.349471916Z"}]
 
-$ tail -1 /tmp/snap_published_demo_file.log | jq
+$ tail -1 /tmp/cpu_stat.log | jq
 ```
 
 stop task:
@@ -277,9 +225,9 @@ ID: 8f3f3994-6341-49e3-bd96-10ec364e3263
 ### Exercise
 
 * ensure the following plugins are load
-    * `snap-plugin-collector-psutil`
+    * `snap-plugin-collector-iostat`
     * `snap-plugin-publisher-file`
-* run the example task `/opt/snap/examples/tasks/psutil-file_no-processor.yaml`
+* run the example task `/opt/snap/examples/tasks/iostat.yaml`
 * verify the task is running successfully (`tail -1 ... | jq`)
 * stop the psutil task `snapctl task stop ...`
 
@@ -353,7 +301,7 @@ $ docker run
 Name: "snap"
 Default: true (checkbox)
 Type: Snap DS
-URL: http://localhost:8181
+URL: http://snap:8181
 Access: proxy
     ```
 * create a [new dashboard](http://localhost:3000/dashboard/new)
@@ -364,11 +312,12 @@ Access: proxy
     ```
 Task Name: memory active
 Interval: 200ms
-Metrics: /intel/procfs/meminfo/active
+Metrics: /intel/linux/iostat/avg-cpu/%idle
     ```
 * click on watch and observe the metrics stream in
 
 ### Exercise
 
 * login to grafana and create the snap datasource
-* create a new dashboard and monitor cpu metrics
+* create a new dashboard and monitor cpu metrics (%idle, %user, %system)
+* to generate cpu load run `dd if=/dev/urandom | bzip2 -9 > /dev/null` in the snap container.
