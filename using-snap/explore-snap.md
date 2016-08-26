@@ -9,7 +9,7 @@ In this section we will:
 
 NOTE: The Snap exercises in this lab can be performed by logging into the snap container. This section assumes any commands are executed within the snap container:
 ```
-$ docker-compose  exec snap /bin/bash
+$ docker-compose exec snap /bin/bash
 root@ab2b16b4ccc9:/#
 ```
 
@@ -97,6 +97,7 @@ Extract snap plugins, and use snapctl command to:
 * load `snap-plugin-collector-meminfo` plugin
 * list meminfo metrics (hint: `... | grep meminfo`)
 * unload `snap-plugin-collector-meminfo` (hint: use `snapctl plugin list` to get necessary info)
+* load `snap-plugin-collector-iostat` plugin
 * load `snap-plugin-publisher-file` plugin
 
 ## snap REST API
@@ -171,13 +172,13 @@ $ cat /opt/snap/examples/tasks/iostat.yaml
   workflow:
     collect:
       metrics:
-        /intel/psutil/load/load1: {}
-        /intel/psutil/load/load15: {}
-        /intel/psutil/load/load5: {}
+        /intel/linux/iostat/avg-cpu/%system: {}
+        /intel/linux/iostat/avg-cpu/%user: {}
+        /intel/linux/iostat/avg-cpu/%idle: {}
       publish:
         - plugin_name: "file"
           config:
-            file: "/tmp/snap_published_demo_file.log"
+            file: "/tmp/cpu_stat.log"
 ```
 
 create task from config file:
