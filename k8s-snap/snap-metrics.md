@@ -9,13 +9,16 @@ In this section we will:
 
 Create granfana service
 ```
-$ kubectl create -f ~/kargo/configs/heapster
+k8s-01 $ kubectl create -f /vagrant/configs/heapster
 ```
 
 Find and access grafana dashboard:
 ```
 $ kubectl cluster-info | grep grafana
+Grafana is running at http://localhost:8080/api/v1/proxy/namespaces/kube-system/services/monitoring-grafana
 ```
+
+![grafana](../images/k8s-grafana.png)
 
 ### Exercise
 
@@ -29,7 +32,7 @@ kubernetes Horizontal Pod Autoscaling (HPA) uses heapster to monitor pod activit
 
 create php application:
 ```
-$ kubectl run php-apache --image=localhost:5000/hpa-example --requests=cpu=200m --expose --port=80
+$ kubectl run php-apache --image=gcr.io/google_containers/hpa-example --requests=cpu=200m --expose --port=80
 service "php-apache" created
 deployment "php-apache" created
 ```
